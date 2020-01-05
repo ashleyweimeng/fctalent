@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1"/>
+    <title>天兰积分排位</title>
+    <script src="lib/d3.js" charset="utf-8"></script>
+    <script src="lib/jquery-1.8.0.min.js" charset="utf-8"></script>
+
+</head>
+<style>
+body {
+  background-color: #222;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family:Arial;
+  text-align: center;
+}
+svg{position: relative; margin: 0 auto; z-index: 99 }
+.year{position: absolute; bottom: 20px; right: 20px; font-size: 30px; color: #fff}
+.replay{position: absolute; font-size: 30px; color: #fff; background-color: rgba(255,255,255,0.4); padding: 10px; border-radius: 5px; z-index: 100; display: none}
+.color div{margin-bottom: 4px;}
+.color span{margin-right: 3px}
+.color{position: absolute; bottom: 70px; right: 20px; font-size: 10px; color: #fff; text-align: left;}
+
+</style>
+
+<body>
+  <div class="year">2004-2009</div>
+  <div class="color">
+    <div style="font-weight:900; border-bottom:1px solid #fff">一级代理</div>
+    <div><span style="color:#cde2ff">■</span>张子鹤</div>
+    <div><span style="color:#f8c379">■</span>高鹏飞</div>
+    <div><span style="color:#f8c379">■</span>陈奕伦</div>
+    <div><span style="color:#66cdaa">■</span>赵鹏飞</div>
+    <div><span style="color:#bac93e">■</span>何丹宁</div>
+    <div><span style="color:#f1b4d1">■</span>毛赛</div>
+    <div><span style="color:#f68081">■</span>高鹏程</div>
+    <div><span style="color:#dfc370">■</span>刘澈</div>
+    <div><span style="color:#f9fc9d">■</span>曹硕</div>
+    <div><span style="color:#ccc">■</span>其他</div>
+  </div>
+  <div class="replay">replay</div>
+</body>
+
+<script type="text/javascript">
+
+
+var width = $(window).width()>640?640:$(window).width(),
+    height = $(window).height();
+
+var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+$(".replay").css("top",height/2-45).css("left",width/2-50)
+        
+var data =[
+["张灏濒",0,373.75,822.25,1220.58,1861.33,2328.83,"张子鹤"],
+["钟依阳",0,355,884.50,1254,1790,2360.25,"高鹏飞"],
+["张子鹤",111,434.75,817.75,1268.08,1669.75,2179.25,"张子鹤"],
+["陈奕伦",100,285,643.50,1063.33,1570.67,1895.83,"陈奕伦"],
+["王振",0,167.50,499.50,874.33,1382.08,1840.42,"陈奕伦"],
+["赵一凡",0,325,665,1083.50,1489.67,1781.50,"陈奕伦"],
+["闫晨",0,200,641,1012,1366.50,1908.17,"赵鹏飞"],
+["赵鹏飞",170,545,992.50,1214,1323.25,1632.58,"赵鹏飞"],
+["吴振铎",0,40,370,737,1180,1640,"何丹宁"],
+["李涛",0,0,333,697.17,1137.67,1546.50,"陈奕伦"],
+["王琛",0,217.50,581.50,714.50,945.50,1174.75,"高鹏程"],
+["毛赛",127.50,352.50,550.50,770.83,1000.50,1175,"毛赛"],
+["姜天",0,172.50,365,532.50,953.50,1072.50,"赵鹏飞"],
+["何丹宁",92.50,282.50,530,742,928.25,1137.58,"何丹宁"],
+["王超",0,155,490,777.50,1004.50,1142.67,"何丹宁"],
+["满达",0,232.50,447.50,819.17,920,945,"毛赛"],
+["王也",0,0,30,196.67,480,928.33,"高鹏程"],
+["李朋飞",0,217.50,367.50,587,716.83,833.83,"毛赛"],
+["高鹏飞",55,347.50,552.50,650.83,680.83,792.50,"高鹏飞"],
+["高政民",0,227.50,439,540.50,584,639,"何丹宁"],
+["梁循标",0,135,247.50,292.50,561,655,"陈奕伦"],
+["范思宇",0,0,42.50,157.50,466.17,575,"高鹏程"],
+["肖晗",0,185,240,328.33,552.17,552.17,"高鹏程"],
+["张磊",0,0,0,0,158.75,588.54,"张子鹤"],
+["陈阳",0,140,165,353.17,393.17,436.50,"陈奕伦"],
+["曾天",0,0,0,0,326,433.50,"陈奕伦"],
+["刘亚雷",0,0,122.50,195,289.33,434.83,"高鹏程"],
+["陶瑞麟",0,0,0,148.33,243.67,438.67,"陈奕伦"],
+["周沫",0,0,0,0,60.50,401.75,"张子鹤"],
+["李豪达",0,55,262.50,294.17,294.17,294.17,"高鹏程"],
+["徐晗",0,0,20,130,150,317.75,"陈奕伦"],
+["王川",0,0,0,0,133.50,248.33,"陈奕伦"],
+["邓智恒",0,15,86,156,186,211,"陈奕伦"],
+["范晓宇",77.50,195,195,195,195,195,"范晓宇"],
+["殷钟睿",0,162.50,182.50,182.50,182.50,182.50,"陈奕伦"],
+["Hayden",0,165,175,175,175,175,"赵鹏飞"],
+["邓锦宏",0,0,0,110.50,120.50,120.50,"高鹏飞"],
+["刘澈",120,120,120,120,120,120,"刘澈"],
+["安中中",112.50,112.50,112.50,112.50,112.50,112.50,"其他"],
+["伍岳",112.50,112.50,112.50,112.50,112.50,112.50,"其他"],
+["高鹏程",55,75,110,110,110,110,"高鹏程"],
+["岳效巍",107.50,107.50,107.50,107.50,107.50,107.50,"赵鹏飞"],
+["许津荣",0,107.50,107.50,107.50,107.50,107.50,"陈奕伦"],
+["许学龙",0,105,105,105,105,105,"陈奕伦"],
+["黄海冬",0,0,0,0,0,152,"陈奕伦"],
+["郭辰",100,100,100,100,100,100,"其他"],
+["蒋思哲",0,55,55,55,75,75,"赵鹏飞"],
+["卢镜方",0,0,0,0,0,75,"高鹏飞"],
+["黄一峰",0,0,22.50,22.50,62.50,62.50,"陈奕伦"],
+["孟月",60,60,60,60,60,60,"毛赛"],
+["曹硕",0,10,20,20,50,50,"曹硕"],
+["沈君煜",45,45,45,45,45,45,"陈奕伦"],
+["毛笛文",0,0,0,0,0,44.17,"毛赛"],
+["贺丹",0,0,35,35,35,35,"高鹏程"],
+["李根",30,30,30,30,30,30,"其他"],
+["仲岳",30,30,30,30,30,30,"其他"],
+["张逸枫",15,25,25,25,25,25,"高鹏程"],
+["李靳",15,15,15,15,15,15,"其他"],
+["周岳",0,0,0,10,10,10,"毛赛"]
+];
+var pTotal = data.length;
+var yTotal = data[0].length-2;
+
+function ordering(year){
+  var array = [];
+  array.push([data[0][0],data[0][year]])
+  for(var i=1; i<data.length; i++){
+    var flag=0
+    for(var j=0; j<array.length; j++){
+      if(data[i][year]>array[j][1]&&flag==0){
+        array.push([array[array.length-1][0],array[array.length-1][1]])
+        for(var k=array.length-1; k>j; k--){
+          array[k][0] = array[k-1][0]
+          array[k][1] = array[k-1][1]
+        }
+        array[j][0] = data[i][0]
+        array[j][1] = data[i][year]
+        flag=1
+      }
+    }
+    if(flag==0) array.push([data[i][0],data[i][year]])
+  }
+  return array
+}
+
+function getOrder(array, name, year){
+  for(var i=0; i<array[0].length; i++){
+    if(array[year-1][i][0]==name) return i;
+  }
+}
+
+buildOrderArray()
+function buildOrderArray(){
+  var orderData=[]
+  for(var i=1; i<=yTotal; i++){
+    var array = ordering(i)
+    orderData.push(array);
+  }
+
+  var order =[]
+  for(var i=0; i<data.length; i++){
+    var tmp = [];
+    for(var y=0; y<yTotal; y++){
+      tmp.push(data[i][y])
+    }
+    order.push(tmp)
+  }
+  for(var i=0; i<data.length; i++){
+    for(var y=1; y<=yTotal; y++){
+      order[i][y] = getOrder(orderData, order[i][0], y)
+    }
+  }
+  
+  initBar(order)
+  setTimeout(function(){anim(order,2) },3000)
+  setTimeout(function(){anim(order,3) },8000)
+  setTimeout(function(){anim(order,4) },13000)
+  setTimeout(function(){anim(order,5) },18000)
+  setTimeout(function(){anim(order,6) },23000)
+  setTimeout(function(){$(".replay").fadeIn(500) },28000)
+  
+}
+
+function initBar(order){
+  var wScale = d3.scale.linear().domain([0, 2500]).range([0, width-30]); 
+  $(".replay").hide()
+  svg.append("g")
+     .selectAll("rect")
+     .data(data)
+     .enter()
+     .append("rect")
+     .attr("x",30)
+     .attr("height",5)
+     .attr("width",function(d){return wScale(d[1])})     
+     .attr("y",function(d,i){
+        var n = order[i][1]
+        return 5+n*12
+      })
+     .attr("fill",function(d){
+        return getColor(d[yTotal+1])        
+     })
+
+  svg.append("g")
+     .selectAll("text")
+     .data(data)
+     .enter()
+     .append("text")
+     .attr("x",0)
+     .attr("y",function(d,i){
+        var n = order[i][1]
+        return n*12
+      })
+     .attr("dy",10)
+     .text(function(d){return d[0]})
+     .attr("fill","#fff")
+     .style("font-size",8)
+
+}
+
+function getColor(name){
+  switch(name){
+          case "张子鹤": return "#cde2ff";
+          case "高鹏飞": return "#298abd";
+          case "陈奕伦": return "#f8c379";
+          case "赵鹏飞": return "#66cdaa";
+          case "何丹宁": return "#bac93e";
+          case "毛赛": return "#f1b4d1";
+          case "高鹏程": return "#f68081";
+          case "刘澈": return "#dfc370";
+          case "曹硕": return "#f9fc9d";
+          default: return "#ccc"
+        }
+}
+function anim(order, year){
+  var wScale = d3.scale.linear().domain([0, 2500]).range([0.5, width-30]); 
+
+  $(".year").html(year+2013)
+
+  svg.selectAll("rect")
+     .transition()
+     .duration(3000)     
+     .attr("width",function(d){return wScale(d[year])})     
+     .attr("y",function(d,i){
+        var n = order[i][year]
+        return 5+n*12
+      })
+
+  svg.selectAll("text")
+     .transition()
+     .duration(3000)     
+     .attr("width",function(d){return wScale(d[year])})     
+     .attr("y",function(d,i){
+        var n = order[i][year]
+        return n*12
+      })
+}
+
+$(".replay").click(function(){
+  $("svg").html("")
+  buildOrderArray()
+  $(".year").html("2004-2009")
+})
+
+</script>
+
+
+
+</html>
