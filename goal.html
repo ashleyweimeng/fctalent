@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1"/>
+    <title>天兰进球助攻</title>
+    <script src="d3.js" charset="utf-8"></script>
+    <script src="jquery-1.8.0.min.js" charset="utf-8"></script>
+
+</head>
+<style>
+body {
+  background-color: #222;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family:Arial;
+  text-align: center;
+}
+svg{position: relative; margin: 0 auto; z-index: 99 }
+.year{position: absolute; bottom: 20px; right: 20px; font-size: 30px; color: #fff}
+.replay{position: absolute; font-size: 30px; color: #fff; background-color: rgba(255,255,255,0.4); padding: 10px; border-radius: 5px; z-index: 100; display: none}
+.color div{margin-bottom: 2px;}
+.color span{margin-right: 3px}
+.color{position: absolute; top: 10px; right: 20px; font-size: 10px; color: #fff; text-align: left;}
+.svgline {
+    animation:dasharray 3s ease;
+    stroke-dasharray: 1000 1000;
+}
+@keyframes dasharray {
+    from {  stroke-dasharray: 0 1000  }
+    to {  stroke-dasharray: 1000 1000  }
+}
+.goal{position: absolute; top:10px; left:40px; font-size: 10px; color: #fff; font-weight:900;}
+.assist{position: absolute; top:10px; left:120px; font-size: 10px; color: #fff; font-weight:900;}
+.info{position: absolute; bottom:10px; right:10px; font-size: 8px; color: #fff; font-weight:200; text-align: right; line-height: 12px}
+
+</style>
+
+<body>
+  <div class="goal">进球</div>
+  <div class="assist">助攻</div>
+  <div class="info">数据来源:2019赛季 数据:JC 制作:M</div>
+  <div class="color">
+    <div style="font-weight:900; border-bottom:1px solid #fff">进球方式</div>
+    <div><span style="color:#cde2ff">●</span>单刀</div>
+    <div><span style="color:#298abd">●</span>突破</div>
+    <div><span style="color:#f8c379">●</span>抢点</div>
+    <div><span style="color:#ffcc21">●</span>点球</div>
+    <div><span style="color:#66cdaa">●</span>任意球</div>
+    <div><span style="color:#bac93e">●</span>补射</div>
+    <div><span style="color:#f1b4d1">●</span>配合</div>
+    <div><span style="color:#f68081">●</span>吊射</div>
+    <div><span style="color:#dfc370">●</span>远射</div>
+    <div><span style="color:#f9fc9d">●</span>角球</div>
+    <div><span style="color:#999">●</span>零角度</div>
+    <div><span style="color:#666">●</span>乌龙球</div>
+    <div><span style="color:#ccc">●</span>其他</div>
+  </div>
+  <div class="replay">replay</div>
+</body>
+
+<script type="text/javascript">
+
+
+var width = $(window).width()>640?640:$(window).width(),
+    height = $(window).height();
+
+
+var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+var svgTop = 40
+var svgLeft = 130
+//$(".replay").css("top",height/2-45).css("left",width/2-50)
+        
+var goal =[
+["钟依阳",17,10,["单刀","单刀","突破","突破","抢点","单刀","抢点","任意球","补射","抢点","配合","抢点","抢点","单刀","突破","单刀","单刀"]],
+["闫晨",14,10,["单刀","单刀","单刀","抢点","抢点","抢点","抢点","抢点","抢点","远射","抢点","突破","抢点","抢点"]],
+["张磊",13,10,["远射","突破","零度角","单刀","任意球","突破","抢点","远射","远射","吊射","远射","角球","点球"]],
+["王琛",10,3,["抢点","配合","突破","抢点","突破","突破","突破","突破","抢点","远射"]],
+["外援",6,4,["抢点","抢点","抢点","单刀","单刀","抢点"]],
+["赵鹏飞",6,0,["抢点","突破","点球","突破","单刀","点球"]],
+["吴振铎",5,5,["远射","突破","单刀","任意球","乌龙球"]],
+["王振",3,1,["单刀","补射","远射"]],
+["高政民",2,0,["抢点","抢点"]],
+["何丹宁",2,2,["抢点","配合"]],
+["毛赛",2,0,["单刀","抢点"]],
+["曾天",1,2,["单刀"]],
+["陈奕伦",1,0,["远射"]],
+["王也",1,1,["远射"]],
+["黄海冬",1,0,["补射"]],
+["姜天",1,4,["其他"]],
+["李涛",1,4,["抢点"]],
+["毛笛文",1,0,["单刀"]],
+["徐晗",1,4,["远射"]],
+["刘亚雷",0,4],
+["周沫",0,1],
+["张灏濒",0,1],
+["Hayden",0,4],
+["张子鹤",0,3],
+["李豪达",0,1],
+];
+var rowHeight = (height-svgTop)/goal.length
+
+var assist = [
+ ["曾天","闫晨",1],
+["高政民","张磊",1],
+["何丹宁","姜天",1],
+["何丹宁","刘亚雷",1],
+["黄海冬","闫晨",1],
+["李涛","周沫",1],
+["毛笛文","钟依阳",1],
+["毛赛","张灏濒",1],
+["毛赛","钟依阳",1],
+["外援","Hayden",1],
+["外援","吴振铎",1],
+["外援","闫晨",1],
+["外援","张磊",1],
+["外援","张子鹤",1],
+["外援","钟依阳",1],
+["王琛","何丹宁",1],
+["王琛","姜天",1],
+["王琛","刘亚雷",1],
+["王琛","外援",1],
+["王琛","张磊",2],
+["王琛","钟依阳",1],
+["王也","吴振铎",1],
+["王振","Hayden",1],
+["王振","闫晨",1],
+["吴振铎","Hayden",1],
+["吴振铎","李涛",1],
+["吴振铎","王也",1],
+["吴振铎","闫晨",1],
+["徐晗","王琛",1],
+["闫晨","曾天",1],
+["闫晨","李涛",1],
+["闫晨","外援",1],
+["闫晨","徐晗",3],
+["闫晨","张磊",3],
+["闫晨","张子鹤",1],
+["闫晨","钟依阳",4],
+["张磊","Hayden",1],
+["张磊","曾天",1],
+["张磊","王振",1],
+["张磊","吴振铎",1],
+["张磊","闫晨",1],
+["张磊","张子鹤",1],
+["张磊","钟依阳",1],
+["赵鹏飞","李豪达",1],
+["赵鹏飞","外援",1],
+["赵鹏飞","王琛",1],
+["赵鹏飞","闫晨",1],
+["赵鹏飞","钟依阳",1],
+["钟依阳","姜天",2],
+["钟依阳","李涛",2],
+["钟依阳","刘亚雷",2],
+["钟依阳","外援",1],
+["钟依阳","王琛",1],
+["钟依阳","吴振铎",1],
+["钟依阳","徐晗",1],
+["钟依阳","闫晨",4],
+["钟依阳","张磊",3]
+]
+var goalTotal = goal.length;
+
+var line=d3.svg.line()
+            .x(function(d){return d[0];})
+            .y(function(d){return d[1];})
+            .interpolate("basis");
+
+
+var a0 = "rgba(255,188,22,0.5)";  
+var a = "rgba(255,188,22,1)";
+var b0 = "rgba(62,101,231,0.8)";
+var b = "rgba(62,101,231,0.5)";
+var defs = svg.append("defs");  
+var linearGradient3 = defs.append("linearGradient")  
+                        .attr("id","linearColor-top-bottom")  
+                        .attr("x1","0%")  
+                        .attr("y1","0%")  
+                        .attr("x2","0%")  
+                        .attr("y2","100%");  
+
+  
+linearGradient3.append("stop")  
+                .attr("offset","0%")  
+                .style("stop-color",a);  
+  
+linearGradient3.append("stop")  
+                .attr("offset","100%")  
+                .style("stop-color",b);  
+
+var linearGradient4 = defs.append("linearGradient")  
+                        .attr("id","linearColor-bottom-top")  
+                        .attr("x1","0%")  
+                        .attr("y1","100%")  
+                        .attr("x2","0%")  
+                        .attr("y2","0%");  
+linearGradient4.append("stop")  
+                .attr("offset","0%")  
+                .style("stop-color",a);  
+  
+linearGradient4.append("stop")  
+                .attr("offset","100%")  
+                .style("stop-color",b);  
+
+initChart()
+function initChart(){
+  svg.append("g")
+     .selectAll("circle")
+     .data(goal)
+     .enter()
+     .append("circle")
+     .attr("cx",svgLeft)
+     .attr("r",function(d,i){
+        return d[2]
+     })
+     .attr("cy",function(d,i){
+        return svgTop+rowHeight*i
+      })
+     .attr("fill",function(d){
+        return b        
+     })
+     .attr("stroke",b0)
+
+  svg.append("g")
+     .selectAll("text")
+     .data(goal)
+     .enter()
+     .append("text")
+     .attr("x",svgLeft-45)
+     .attr("y",function(d,i){
+        return svgTop+rowHeight*i
+      })
+     .attr("dy",3)
+     .attr("fill",function(d){
+        return "#fff"        
+     })
+     .text(function(d){return d[0]})
+     .style("font-size",10)
+     .on("click",function(d){
+      d3.selectAll(".path-group").style("opacity",0.1)
+      d3.selectAll("."+d[0]).style("opacity",1)
+     })
+
+  function lineData(item){
+     var p2 = getOrder(item[0])
+     var y2 = svgTop + p2 * rowHeight
+     var p1 = getOrder(item[1])
+     var y1 = svgTop + p1 * rowHeight
+     var mx = svgLeft+Math.abs(y1-y2)/2;
+     var my = y2+(y1-y2)/2
+     return [[svgLeft,y1],[mx,my],[svgLeft,y2]]
+  }
+
+  function getOrder(name){
+    for(var i=0; i<goal.length; i++){
+      if(goal[i][0]==name) return i;
+    }
+  }
+
+  for(var i=0; i<assist.length; i++){
+    svg.append("g")
+      .attr("class",assist[i][0]+" "+assist[i][1]+" path-group")
+      .append("path")
+      .attr("d", line(lineData(assist[i])))
+      .attr("stroke",function(){
+                    var array = lineData(assist[i])
+                    var y=array[0][1]-array[2][1];
+                    var direction;
+                    
+                    if(y>0) direction="top-bottom";
+                    else direction="bottom-top";
+                    return "url(#linearColor-" + direction + ")";
+                })
+      .attr("stroke-width", function(){return assist[i][2]})
+      .attr("fill", "none")
+      .attr("stroke-dasharray", "0px,1000px")
+      .transition()
+      .delay(i*200)
+      .attr("class","svgline")
+  }
+
+  for(var n=0; n<goal.length; n++){
+    if(goal[n][3]){
+    svg.append("g")
+      .selectAll("text")
+     .data(goal[n][3])
+     .enter()
+     .append("text")
+     .attr("x",function(d,i){
+      return 75 - (i%10)*7
+     })
+     .attr("y",function(d,i){
+        return svgTop+rowHeight*n
+      })
+     .attr("dy",function(d,i){
+        if(goal[n][3].length>10){
+          
+          if(i>=10) return 6;
+          else return -2
+        }
+        else return 2
+     })
+     .attr("fill",function(d){
+        return getColor(d)        
+     })
+     .text(function(d){
+        return "●";
+        //return getShape(d)
+    })
+     .style("font-size",10)
+   }
+  }
+}
+
+function getColor(text){
+  switch(text){
+    case "单刀":return "#cde2ff";
+    case "突破":return "#298abd";
+    case "抢点":return "#f8c379";
+    case "点球":return "#ffcc21";
+    case "任意球":return "#66cdaa";
+    case "补射":return "#bac93e";
+    case "配合":return "#f1b4d1";
+    case "吊射":return "#f68081";
+    case "远射":return "#dfc370";
+    case "角球":return "#f9fc9d";
+    case "乌龙球":return "#ccc";
+    case "零度角":return "#666";
+    case "其他":return "#999";
+  }
+}
+
+
+
+$(".replay").click(function(){
+  $("svg").html("")
+  buildOrderArray()
+  $(".year").html("2004-2009")
+})
+
+</script>
+
+
+
+</html>
