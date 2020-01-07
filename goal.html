@@ -239,7 +239,7 @@ function initChart(){
      })
      .text(function(d){return d[0]})
      .style("font-size",10)
-     .on("touchstart click",function(d){
+     .on("touchstart",function(d){
       d3.selectAll(".path-group").style("opacity",0.1)
       d3.selectAll("."+d[0]).style("opacity",1)
      })
